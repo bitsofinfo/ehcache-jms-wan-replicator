@@ -104,7 +104,7 @@
 			     properties="factoryClass=net.sf.ehcache.distribution.jms.JMSCacheReplicatorFactory,
 			                  actionOverrideMap.put=nothing,
 			                  actionOverrideMap.update=remove,
-			     			  replicateAsynchronously=true,
+			     		  replicateAsynchronously=true,
 			                  replicatePuts=true,
 			                  replicateUpdates=true,
 			                  replicateUpdatesViaCopy=true,
