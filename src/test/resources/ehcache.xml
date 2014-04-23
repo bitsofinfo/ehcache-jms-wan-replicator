@@ -61,7 +61,7 @@
 	    <!--  ditto above -->
 		<cacheManagerPeerListenerFactory
 			class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"
-			properties="hostName=localhost, port=40001,
+			properties="hostName=localhost, port=40003,
 			socketTimeoutMillis=2000"/>
        
        
@@ -94,15 +94,15 @@
 		  	   For replicating cache events (EXCLUDING Element content) externally
 		       to peers that live in other DC's that live across a WAN etc.
 		       
-		       This is configured to convert cache PUTs/UPDATEs (which would normally
-		       include actual cached element data) to REMOVEs (no data). Receiving
-		       DC's across WANs, will respond by just dumping these keys locally and
+		       This is configured to force cache PUTS->noAction and UPDATEs (which would normally
+		       include actual cached element data) to REMOVEs (no data) (same as replicateUpdatesViaCopy). 
+		       Receiving DC's across WANs, will respond by just dumping these keys locally and
 		       letting cache-misses repopulate from the underlying authoritative datasource
 		   -->	
 	       <cacheEventListenerFactory
 			     class="org.bitsofinfo.ehcache.jms.custom.OverridableActionCacheReplicatorFactory"
 			     properties="factoryClass=net.sf.ehcache.distribution.jms.JMSCacheReplicatorFactory,
-			                  actionOverrideMap.put=remove,
+			                  actionOverrideMap.put=nothing,
 			                  actionOverrideMap.update=remove,
 			     			  replicateAsynchronously=true,
 			                  replicatePuts=true,
