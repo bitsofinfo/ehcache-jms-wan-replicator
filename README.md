@@ -1,1 +1,35 @@
+ehcache-jms-wan-replicator
+====================
+
+This is customizable module that builds upon Ehcache's replication framework (specifically the JMS Replicated Caching module) that allows for lighter weight cache events to be disseminated across different data-centers. 
+
+Caveat: this has yet to be used in a production environment, but is currently being evaluated/tested as part of a larger project where it (or something like it) might be levereged.
+
+The original need for this little module came out of a need ensure that caches across a GSLB'd (globally load balanced) application could be kept reasonably in "sync" without having to push the actual cached data around across WANs etc. The specific need is for an app that uses Ehcache internally for caching various data points. 
+In the use-case that drove this little test; *within any given data-center* that runs the app, Ehcache is already configured to use the existing Ehcache replication facilities (RMI/JGroups) for *within-DC* peer node replication. For cache puts/updates Ehcache always includes the actual cached data in its replication. However for a different data-center across the world, there is really no need to send that cached data over the wire. Instead you just want to let nodes in that other data-center know that a given cached *key* was changed, and the nodes in the other DC should *remove* that key... then just let the next request for the data trigger a cache-miss and repopulate the latest data from the shared data-source (which is replicated/clustered via a totally separate process). The overall *speed* of how soon a cache event, triggerring a *remove* in another DC actually happens.... basically comes down to the principal of eventual-consistency. Everyones individual requirements will vary, but my requirement is basically within a few minutes; which is better than forcing disseparate DC's to rely soley on TTLs which might be much much longer.
+
+So what does this all mean in how it relates to this chunk of code? In a nutshell this code allows you to define separate *cacheManagerPeerProviderFactories* and *cacheEventListenerFactories* that build upon the Ehcache JMS Replication functionality, but specifically adds the following features, key do doing whats described above. Think of this as a *second DC to DC cluster layer* that is entirely separate from your *within DC echache replication*. See diagram below
+
+* Decorate the OUTBOUND JMS Messages with additional custom key-value pairs (strings)
+* Define primitive JMS selectors to control which INBOUND replication messages are actually processed
+* Permit totally overriding how local Ehcache events actions are to be replicated (i.e. saying a local PUT will be replicated to the other DC's as a REMOVE) 
+
+With the above three features you can then configure the JMS replication to ignore messages generated from the local DC (via selector and custom replication message properties) and publish messages to other DC's that are lighterweight (i.e. we only tell other DC's to REMOVE for any cache event that occurs locally)
+
+This implementation was specifically built around using [Nevado JMS](https://github.com/skyscreamer/nevado "Nevado JMS") which lets us leverage AWS (SNS/SQS) for the globally available "topic" that all DC's subscribe too.
+
+Reference
+------------
+
+* http://bitsofinfo.wordpress.com/2014/04/21/ehcache-replicated-caching-with-jms-aws-sqs-sns-nevado/
+* http://ehcache.org/documentation/replication/index
+* http://ehcache.org/documentation/replication/jms-replicated-caching
+* https://github.com/skyscreamer/nevado
+* http://nevado.skyscreamer.org/
+* http://aws.amazon.com/sns/
+* http://aws.amazon.com/sqs/
+
+author: bitsofinfo.g[at]gmail.com
+
+
 ![Alt text](/docs/diagram.png "Diagram")
