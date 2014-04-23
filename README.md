@@ -35,6 +35,7 @@ Reference
 ------------
 
 * http://bitsofinfo.wordpress.com/2014/04/21/ehcache-replicated-caching-with-jms-aws-sqs-sns-nevado/
+* http://bitsofinfo.wordpress.com/2014/04/22/part-2-nevado-jms-ehcache-jms-wan-replication-and-aws/
 * http://ehcache.org/documentation/get-started/cache-topologies
 * http://ehcache.org/documentation/replication/index
 * http://ehcache.org/documentation/replication/jms-replicated-caching
