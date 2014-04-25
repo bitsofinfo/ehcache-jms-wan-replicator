@@ -1,4 +1,4 @@
-<ehcache>
+<ehcache name="${cacheManagerName}">
 
   	<diskStore path="user.home/ehcacheJMS"/>
 
@@ -31,8 +31,8 @@
        class="org.bitsofinfo.ehcache.jms.custom.CustomizableJMSCacheManagerPeerProviderFactory"
        				
        properties="initialContextFactoryName=org.bitsofinfo.ehcache.jms.custom.nevado.NevadoInitialContextFactory, 
-      		 	   maxBatchQueuingTimeMS=30000,
-				   maxEventsPerBatch=200,
+      		 	   maxBatchQueuingTimeMS=10000,
+				   maxEventsPerBatch=300,
        			   nevado.awsAccessKey=PUT_ACCESS_KEY_HERE,
        			   nevado.awsSecretKey=PUT_SECRET_KEY_HERE,
        			   nevado.SNSTopicName=ehcacheJMSTopic,
@@ -46,53 +46,94 @@
        propertySeparator="," />
        
        
-       <!-- 
-       		OPTIONAL, the next two listener/provider factories are just here as an example.
-       		
-       		RMICacheManagerPeerProviderFactory: Handles local DC replication of cache events. 
-       		
-       		http://ehcache.org/documentation/replication/rmi-replicated-caching
-       		
-       		RMICacheManagerPeerProviderFactory
-        -->
-       <cacheManagerPeerProviderFactory
-			class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
-			properties="peerDiscovery=manual,
-						rmiUrls=//localhost:40001/testCache|//localhost:40002/testCache|//localhost:40003/testCache"/>
-			
-			
-	    <!--  ditto above -->
-		<cacheManagerPeerListenerFactory
-			class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"
-			properties="hostName=localhost, port=40003,
-			socketTimeoutMillis=2000"/>
-       
-       
-       
+   
        
      <!-- 
-     
-     	The test cache
-     
+     	testCache1
       -->
-	 <cache name="testCache"
-	       maxElementsInMemory="1000"
-	       maxElementsOnDisk="2000"
+	 <cache name="testCache1"
+	       maxElementsInMemory="100000"
+	       maxElementsOnDisk="50000"
 	       eternal="false"
 	       overflowToDisk="false"
 	       memoryStoreEvictionPolicy="LRU"
 	       transactionalMode="off">
 	       
+
+	       <!-- 
+		  	   For replicating cache events (EXCLUDING Element content) externally
+		       to peers that live in other DC's that live across a WAN etc.
+		       
+		       This is configured to force cache PUTS->noAction and UPDATEs (which would normally
+		       include actual cached element data) to REMOVEs (no data) (same as replicateUpdatesViaCopy). 
+		       Receiving DC's across WANs, will respond by just dumping these keys locally and
+		       letting cache-misses repopulate from the underlying authoritative datasource
+		   -->	
+	       <cacheEventListenerFactory
+			     class="org.bitsofinfo.ehcache.jms.custom.OverridableActionCacheReplicatorFactory"
+			     properties="factoryClass=net.sf.ehcache.distribution.jms.JMSCacheReplicatorFactory,
+			                  actionOverrideMap.put=nothing,
+			                  actionOverrideMap.update=remove,
+                              replicateAsynchronously=true,
+			                  replicatePuts=true,
+			                  replicateUpdates=true,
+			                  replicateUpdatesViaCopy=true,
+			                  replicateRemovals=true,
+			                  asynchronousReplicationIntervalMillis=1000"
+			      propertySeparator=","/>
+			      
+
+  	</cache>
+  	
+  	  <!-- 
+     	testCache2
+      -->
+	 <cache name="testCache2"
+	       maxElementsInMemory="100000"
+	       maxElementsOnDisk="50000"
+	       eternal="false"
+	       overflowToDisk="false"
+	       memoryStoreEvictionPolicy="LRU"
+	       transactionalMode="off">
 	       
-		  <!-- 
-		  	   For replicating cache events (INCLUDING Element content) locally
-		       to other peers within the same cluster operating out of the same DC
-		   -->	      
-		  <cacheEventListenerFactory
-				class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
-				properties="replicateAsynchronously=false, replicatePuts=true, replicateUpdates=true,
-				replicateUpdatesViaCopy=false, replicateRemovals=true "/>
+
+	       <!-- 
+		  	   For replicating cache events (EXCLUDING Element content) externally
+		       to peers that live in other DC's that live across a WAN etc.
+		       
+		       This is configured to force cache PUTS->noAction and UPDATEs (which would normally
+		       include actual cached element data) to REMOVEs (no data) (same as replicateUpdatesViaCopy). 
+		       Receiving DC's across WANs, will respond by just dumping these keys locally and
+		       letting cache-misses repopulate from the underlying authoritative datasource
+		   -->	
+	       <cacheEventListenerFactory
+			     class="org.bitsofinfo.ehcache.jms.custom.OverridableActionCacheReplicatorFactory"
+			     properties="factoryClass=net.sf.ehcache.distribution.jms.JMSCacheReplicatorFactory,
+			                  actionOverrideMap.put=nothing,
+			                  actionOverrideMap.update=remove,
+                              replicateAsynchronously=true,
+			                  replicatePuts=true,
+			                  replicateUpdates=true,
+			                  replicateUpdatesViaCopy=true,
+			                  replicateRemovals=true,
+			                  asynchronousReplicationIntervalMillis=1000"
+			      propertySeparator=","/>
+			      
+
+  	</cache>
+  	
+  	  <!-- 
+     	testCache3
+      -->
+	 <cache name="testCache3"
+	       maxElementsInMemory="100000"
+	       maxElementsOnDisk="50000"
+	       eternal="false"
+	       overflowToDisk="false"
+	       memoryStoreEvictionPolicy="LRU"
+	       transactionalMode="off">
 	       
+
 	       <!-- 
 		  	   For replicating cache events (EXCLUDING Element content) externally
 		       to peers that live in other DC's that live across a WAN etc.

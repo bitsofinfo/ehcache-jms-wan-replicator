@@ -1,8 +1,6 @@
 package org.bitsofinfo.ehcache.jms.custom.nevado;
 
 import java.util.Hashtable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
@@ -12,6 +10,8 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bitsofinfo.ehcache.jms.custom.CustomizableJMSCacheManagerPeerProviderFactory;
 import org.skyscreamer.nevado.jms.NevadoConnectionFactory;
 import org.skyscreamer.nevado.jms.connector.amazonaws.AmazonAwsSQSConnectorFactory;
@@ -33,23 +33,23 @@ import org.skyscreamer.nevado.jms.destination.NevadoTopic;
  */
 public class NevadoInitialContextFactory implements InitialContextFactory {
 	
-	private static final Logger LOG = Logger.getLogger(NevadoInitialContextFactory.class.getName());
+	private final Log LOG = LogFactory.getLog(getClass());
 	
 	public Context getInitialContext(Hashtable environment) throws NamingException {
 
 
 		try {
 			if (isBlank(environment.get("nevado.awsAccessKey"))) {
-				LOG.log(Level.SEVERE, "createCachePeerProvider() 'awsAccessKey' is REQUIRED");
+				LOG.error("createCachePeerProvider() 'awsAccessKey' is REQUIRED");
 			}
 			if (isBlank(environment.get("nevado.awsSecretKey"))) {
-				LOG.log(Level.SEVERE, "createCachePeerProvider() 'awsSecretKey' is REQUIRED");
+				LOG.error("createCachePeerProvider() 'awsSecretKey' is REQUIRED");
 			}
 			if (isBlank(environment.get("nevado.SQSQueueName"))) {
-				LOG.log(Level.SEVERE, "createCachePeerProvider() 'SQSQueueName' is REQUIRED");
+				LOG.error("createCachePeerProvider() 'SQSQueueName' is REQUIRED");
 			}
 			if (isBlank(environment.get("nevado.SNSTopicName"))) {
-				LOG.log(Level.SEVERE, "createCachePeerProvider() 'SNSTopicName' is REQUIRED");
+				LOG.error("createCachePeerProvider() 'SNSTopicName' is REQUIRED");
 			}
 			
 			NevadoConnectionFactory nevadoConnectionFactory = 
@@ -76,7 +76,7 @@ public class NevadoInitialContextFactory implements InitialContextFactory {
 			return new NevadoContext(data);
 			
 		} catch(Exception e) {
-			LOG.log(Level.SEVERE, "getInitialContext() error: " + e.getMessage(), e);
+			LOG.error("getInitialContext() error: " + e.getMessage(), e);
 			throw new NamingException("Error creating Nevado JMS resources: " + e.getMessage());
 		}
 	}

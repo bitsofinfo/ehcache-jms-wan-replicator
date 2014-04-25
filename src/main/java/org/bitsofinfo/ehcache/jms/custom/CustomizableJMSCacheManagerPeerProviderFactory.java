@@ -3,8 +3,6 @@ package org.bitsofinfo.ehcache.jms.custom;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
@@ -19,6 +17,9 @@ import net.sf.ehcache.distribution.CacheManagerPeerProviderFactory;
 import net.sf.ehcache.distribution.jms.AcknowledgementMode;
 import net.sf.ehcache.distribution.jms.JMSCacheManagerPeerProvider;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * Implementation of CacheManagerPeerProviderFactory that returns 
@@ -32,7 +33,7 @@ import net.sf.ehcache.distribution.jms.JMSCacheManagerPeerProvider;
  */
 public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManagerPeerProviderFactory {
 	
-	private static final Logger LOG = Logger.getLogger(CustomizableJMSCacheManagerPeerProviderFactory.class.getName());
+	private final Log LOG = LogFactory.getLog(getClass());
 	
 	public static final String CTX_PROP_TOPIC = "topic";
 	public static final String CTX_PROP_TOPIC_CONNECTION = "topicConnection";
@@ -45,7 +46,7 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 		try {
 			
 			if (isBlank(props.getProperty("initialContextFactoryName"))) {
-				LOG.log(Level.SEVERE, "createCachePeerProvider() 'initialContextFactoryName' is REQUIRED");
+				LOG.error("createCachePeerProvider() 'initialContextFactoryName' is REQUIRED");
 			}
 
 			String initialContextFactoryName = props.getProperty("initialContextFactoryName");
@@ -65,16 +66,24 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 				topicConnection = (TopicConnection)context.lookup(CTX_PROP_TOPIC_CONNECTION);
 				
 			} catch(Exception e) {
-				LOG.log(Level.SEVERE, "createCachePeerProvider() error creating Context: " + initialContextFactoryName, e);
+				LOG.error("createCachePeerProvider() error creating Context: " + initialContextFactoryName, e);
 				return null;
 			}
 
 			if (isBlank(props.getProperty("messageSelectorsSupported"))) {
-				LOG.log(Level.SEVERE, "createCachePeerProvider() 'messageSelectorsSupported' is REQUIRED");
+				LOG.error("createCachePeerProvider() 'messageSelectorsSupported' is REQUIRED");
 			}
 
 			if (isBlank(props.getProperty("messageSelectorsSupported"))) {
-				LOG.log(Level.SEVERE, "createCachePeerProvider() 'messageSelectorsSupported' is REQUIRED");
+				LOG.error("createCachePeerProvider() 'messageSelectorsSupported' is REQUIRED");
+			}
+
+			if (isBlank(props.getProperty("maxBatchQueuingTimeMS"))) {
+				LOG.error("createCachePeerProvider() 'maxBatchQueuingTimeMS' is REQUIRED");
+			}
+			
+			if (isBlank(props.getProperty("maxEventsPerBatch"))) {
+				LOG.error("createCachePeerProvider() 'maxEventsPerBatch' is REQUIRED");
 			}
 
 
@@ -82,20 +91,20 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 			Map<String,String> messageDecorations = expandDotNotationProperty(props,"messageDecorations");
 			
 			if (messageDecorations.size() == 0) {
-				LOG.log(Level.WARNING, "createCachePeerProvider() messageDecorations.propName (one or more) is recommended");
+				LOG.warn("createCachePeerProvider() messageDecorations.propName (one or more) is recommended");
 			}
 			
 			boolean messageSelectorsSupported = Boolean.valueOf(props.getProperty("messageSelectorsSupported"));
 			
 			if (messageSelectorsSupported && isBlank(props.getProperty("messageSelector"))) {
 				
-				LOG.log(Level.WARNING, "createCachePeerProvider() messageSelectorsSupported=true but 'messageSelector' is NOT DEFINED.");
+				LOG.warn("createCachePeerProvider() messageSelectorsSupported=true but 'messageSelector' is NOT DEFINED.");
 				
 			} else if (!messageSelectorsSupported && 
 						(isBlank(props.getProperty("ignoreMessagePropVal")) || 
 						isBlank(props.getProperty("ignoreMessagePropName"))) )	{
 				
-				LOG.log(Level.WARNING, "createCachePeerProvider() messageSelectorsSupported=false " +
+				LOG.warn("createCachePeerProvider() messageSelectorsSupported=false " +
 						"but 'ignoreMessagePropName' and/or 'ignoreMessagePropVal' is NOT DEFINED.");
 				
 			}
@@ -103,6 +112,8 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 			String messageSelector = props.getProperty("messageSelector");
 			String ignoreMessagePropName = props.getProperty("ignoreMessagePropName");
 			String ignoreMessagePropVal = props.getProperty("ignoreMessagePropVal");
+			Long maxBatchQueuingTimeMS = Long.valueOf(props.getProperty("maxBatchQueuingTimeMS"));
+			Integer maxEventsPerBatch = Integer.valueOf(props.getProperty("maxEventsPerBatch"));
 
 			
 			
@@ -110,7 +121,7 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 
 			if (!messageSelectorsSupported) {	
 				
-				LOG.log(Level.INFO, "createCachePeerProvider() Creating JMSCacheManagerPeerProvider " +
+				LOG.info("createCachePeerProvider() Creating JMSCacheManagerPeerProvider " +
 						"configured to decorate all outbound JMS Messages w/ properties: " + map2String(messageDecorations) + 
 						" AND IGNORE inbound messages where " + ignoreMessagePropName + " = " + ignoreMessagePropVal);
 				
@@ -120,7 +131,7 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 				
 			} else {
 				
-				LOG.log(Level.INFO, "createCachePeerProvider() Creating JMSCacheManagerPeerProvider " +
+				LOG.info("createCachePeerProvider() Creating JMSCacheManagerPeerProvider " +
 						"configured to decorate all outbound JMS Messages w/ properties: " + map2String(messageDecorations) + 
 						" AND IGNORE filter inbound messages where messageSelector = " + messageSelector);
 				
@@ -131,16 +142,18 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 			// register shutdown thread for cleanup
 			Runtime.getRuntime().addShutdownHook(new JMSCleanupShutdownHook(topicConnection,getReplyQueueConnection));
 			
-			return new JMSCacheManagerPeerProvider(cacheManager, 
-												   topicConnectionProxy, 
-												   topic, 
-												   getReplyQueueConnection, 
-												   getReplyQueue, 
-												   AcknowledgementMode.AUTO_ACKNOWLEDGE, 
-												   true);
+			return new BatchingJMSCacheManagerPeerProvider(maxBatchQueuingTimeMS,
+														   maxEventsPerBatch,
+														   cacheManager, 
+														   topicConnectionProxy, 
+														   topic, 
+														   getReplyQueueConnection, 
+														   getReplyQueue, 
+														   AcknowledgementMode.AUTO_ACKNOWLEDGE, 
+														   true);
 			
 		} catch(Exception e) {
-			LOG.log(Level.SEVERE, "createCachePeerProvider() unexpected error: " + e.getMessage(), e);
+			LOG.error("createCachePeerProvider() unexpected error: " + e.getMessage(), e);
 			return null;
 		}
 	}
@@ -170,7 +183,9 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 		return str == null || str.trim().length() == 0;
 	}
 	
-	private static class JMSCleanupShutdownHook extends Thread {
+	private class JMSCleanupShutdownHook extends Thread {
+		
+		private final Log LOG = LogFactory.getLog(getClass());
 		
 		private TopicConnection topicConn = null;
 		private QueueConnection queueConn = null;
@@ -186,12 +201,12 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 	      try {
 	    	  topicConn.close();
 	      } catch(Throwable e) {
-	    	  LOG.log(Level.WARNING, "JMSCleanupShutdownHook topicConn.close() : " + e.getMessage());
+	    	  LOG.warn("JMSCleanupShutdownHook topicConn.close() : " + e.getMessage());
 	      }
 	      try {
 	    	  queueConn.close();
 	      } catch(Throwable e) {
-	    	  LOG.log(Level.WARNING, "JMSCleanupShutdownHook queueConn.close() : " + e.getMessage());
+	    	  LOG.warn("JMSCleanupShutdownHook queueConn.close() : " + e.getMessage());
 	      }
 	    }
 

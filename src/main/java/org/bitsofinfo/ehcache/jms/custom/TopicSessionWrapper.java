@@ -87,6 +87,11 @@ public class TopicSessionWrapper implements TopicSession {
 		this.valueToIgnore = valueToIgnore;
 	}
 	
+
+	public TopicPublisher createPublisher(Topic arg0) throws JMSException {
+		return proxied.createPublisher(arg0);
+	}
+
 	
 	/**
 	 * Decorate the message w/ the configured decorations
@@ -124,7 +129,16 @@ public class TopicSessionWrapper implements TopicSession {
 		
 		return topicSubscriber;
 	}
+	
 
+	public ObjectMessage createObjectMessage() throws JMSException {
+		return (ObjectMessage)decorateMessage(proxied.createObjectMessage());
+	}
+
+	public ObjectMessage createObjectMessage(Serializable arg0)
+			throws JMSException {
+		return (ObjectMessage)decorateMessage(proxied.createObjectMessage(arg0));
+	}
 
 	public void close() throws JMSException {
 		proxied.close();
@@ -167,15 +181,6 @@ public class TopicSessionWrapper implements TopicSession {
 
 	public Message createMessage() throws JMSException {
 		return (Message)decorateMessage(proxied.createMessage());
-	}
-
-	public ObjectMessage createObjectMessage() throws JMSException {
-		return (ObjectMessage)decorateMessage(proxied.createObjectMessage());
-	}
-
-	public ObjectMessage createObjectMessage(Serializable arg0)
-			throws JMSException {
-		return (ObjectMessage)decorateMessage(proxied.createObjectMessage(arg0));
 	}
 
 	public MessageProducer createProducer(Destination arg0) throws JMSException {
@@ -238,10 +243,6 @@ public class TopicSessionWrapper implements TopicSession {
 	public TopicSubscriber createDurableSubscriber(Topic arg0, String arg1,
 			String arg2, boolean arg3) throws JMSException {
 		return proxied.createDurableSubscriber(arg0, arg1, arg2, arg3);
-	}
-
-	public TopicPublisher createPublisher(Topic arg0) throws JMSException {
-		return proxied.createPublisher(arg0);
 	}
 
 	public TopicSubscriber createSubscriber(Topic arg0) throws JMSException {

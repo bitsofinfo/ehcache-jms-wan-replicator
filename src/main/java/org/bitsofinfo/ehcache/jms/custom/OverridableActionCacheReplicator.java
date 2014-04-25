@@ -2,12 +2,14 @@ package org.bitsofinfo.ehcache.jms.custom;
 
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.distribution.CacheReplicator;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Implementation CacheReplicator<-CacheEventListener who's purpose
@@ -23,7 +25,7 @@ import net.sf.ehcache.distribution.CacheReplicator;
  */
 public class OverridableActionCacheReplicator implements CacheReplicator {
 	
-	private static final Logger LOG = Logger.getLogger(OverridableActionCacheReplicator.class.getName());
+	private final Log LOG = LogFactory.getLog(getClass());
 	
 	public static final String ACTION_PUT = "put";
 	public static final String ACTION_REMOVE = "remove";
@@ -111,7 +113,7 @@ public class OverridableActionCacheReplicator implements CacheReplicator {
 			
 		} else if (notifiedAction.equalsIgnoreCase(ACTION_REMOVE_ALL)) {
 			proxiedReplicator.notifyRemoveAll(cache);
-			
+
 		} else if (notifiedAction.equalsIgnoreCase(ACTION_NOTHING)) {
 			// do nothing!
 			
