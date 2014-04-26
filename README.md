@@ -27,10 +27,9 @@ This implementation was specifically built around using [Nevado JMS](https://git
 Getting Started
 -----------------
 
-* Look at the [super-dumb little test program](https://github.com/bitsofinfo/ehcache-jms-wan-replicator/blob/master/src/test/java/org/bitsofnfo/ehcache/jms/custom/EhcacheNevadoJMSTest.java "link") that starts up ehcache. 
-* Check at the [echcache.xml config file](https://github.com/bitsofinfo/ehcache-jms-wan-replicator/blob/master/src/test/resources/ehcache.xml "config") that the test program uses to define all the cache replication configuration
-* Run the EhcacheNevadoJMSTest.java program in an IDE, you will need an AWS account and access to SNS/SQS, define a topic there and get an accessKey/secretKey that need to go into the peer provider configuration.
-* When running it be sure to specify the System parameter -DdatacenterID=value parameter. You will see this referenced in the example ehcache.xml file. All local-data-center "peer" nodes should share this ID. This is what marks their outbound messages for other DC's to consume, and lets the local DC filter them.
+* Look at the [Unit Test](https://github.com/bitsofinfo/ehcache-jms-wan-replicator/blob/master/src/test/java/org/bitsofnfo/ehcache/jms/custom/EhcacheNevadoJMSTest.java "link") that boots up 3 separate instances of Ehcache and validates the behavior of "updates" resulting in "removes" on the other "dc instances" and utilizes the batching behavior.
+* Check at the [echcache.xml example config file](https://github.com/bitsofinfo/ehcache-jms-wan-replicator/blob/master/src/test/resources/ehcache.xml "config") 
+* You will need an AWS account and access to SNS/SQS, define a topic there and get an accessKey/secretKey that need to go into the peer provider configuration. See the ehcache.xml example files.
 
 If this evolves I'll update this w/ more info.
 
