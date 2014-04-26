@@ -1,7 +1,7 @@
 ehcache-jms-wan-replicator
 ====================
 
-This is customizable module that builds upon Ehcache's replication framework (specifically the JMS Replicated Caching module) that allows for lighter weight cache events to be disseminated across different data-centers in a hub/spoke pub-sub model w/ batching. First implementation leverages Nevado over AWS SNS/SQS
+This is customizable module that builds upon Ehcache's replication framework (specifically the JMS Replicated Caching module) that allows for lighter weight cache events to be disseminated across different data-centers in a hub/spoke pub-sub model w/ batching. First implementation leverages Nevado over AWS SNS/SQS and is inteded to be used for GSLB'd applications where eventual (near-real-time) cache consistency is acceptable, and preferred over relying soley on cache TTLs.
 
 Caveat: this has yet to be used in a production environment, but is currently being evaluated/tested as part of a larger project where it (or something like it) might be levereged.
 
