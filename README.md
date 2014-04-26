@@ -1,10 +1,19 @@
 ehcache-jms-wan-replicator
 ====================
 
-This is customizable module that builds upon Ehcache's replication framework (specifically the JMS Replicated Caching module) that allows for lighter weight cache events to be disseminated across different data-centers. 
+This is customizable module that builds upon Ehcache's replication framework (specifically the JMS Replicated Caching module) that allows for lighter weight cache events to be disseminated across different data-centers in a hub/spoke pub-sub model w/ batching. First implementation leverages Nevado over AWS SNS/SQS
 
 Caveat: this has yet to be used in a production environment, but is currently being evaluated/tested as part of a larger project where it (or something like it) might be levereged.
 
+What does this add to Ehcache JMS replication?
+----------------------
+* Decorates the OUTBOUND JMS Messages with additional custom key-value pairs (strings)
+* Defines primitive JMS selectors to control which INBOUND replication messages are actually processed
+* Adds batching of events in a simplified JMS TextMessage optimized for sending hundreds of events in one message; works much better with SNS/SQS JMS backends. (avoiding Java serialization based ObjectMessages when possible)
+* Permit totally overriding how local Ehcache events actions are to be replicated. For example saying a local PUT will be replicated to the other DC's as a EXPIRE, or a PUT will do *NOTHING*, or an UPDATE yields a REMOVE etc. Ehcache already gives you some hooks for via *replicatePuts*, *replicatePutsViaCopy* and *replicateUpdatesViaCopy*, but you may want to completey override everthing as you wish, and this module lets you do that explicitly.
+
+Background
+-----------------
 The original need for this little module came out of a need ensure that caches across a GSLB'd (globally load balanced) application could be kept reasonably in "sync" without having to push the actual cached data around across WANs and allow the user to configure more explicitly what local events actions get translated to for cross-dc event replication. The specific need is for an app that uses Ehcache internally for caching various data points.
 
 In the use-case that drove this little test; *within any given data-center* that runs the app, Ehcache is already configured to use the existing Ehcache replication facilities (RMI/JGroups) for *within-DC* peer node replication. Generally, for cache puts/updates Ehcache always includes the actual cached data in its replication. Note that this is configurable via the *replicatePuts*, *replicatePutsViaCopy* and *replicateUpdatesViaCopy* etc to force *removes* on update/put.
