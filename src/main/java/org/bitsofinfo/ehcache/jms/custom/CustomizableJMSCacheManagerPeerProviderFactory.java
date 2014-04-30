@@ -15,7 +15,6 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.distribution.CacheManagerPeerProvider;
 import net.sf.ehcache.distribution.CacheManagerPeerProviderFactory;
 import net.sf.ehcache.distribution.jms.AcknowledgementMode;
-import net.sf.ehcache.distribution.jms.JMSCacheManagerPeerProvider;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

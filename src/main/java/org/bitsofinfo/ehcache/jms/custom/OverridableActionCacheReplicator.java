@@ -90,6 +90,11 @@ public class OverridableActionCacheReplicator implements CacheReplicator {
 	
 	private void handleNotification(String notifiedAction, Ehcache cache, Element element) throws CacheException {
 		String notifiedActionOverride = actionOverrideMap.get(notifiedAction);
+		
+		LOG.debug("handleNotification() received notifiedAction of: " + notifiedAction + 
+				" for cache: " + cache.getName() + " element:" 
+				+ (element!=null && element.getObjectKey()!=null? element.getObjectKey().toString() : "null"));
+		
 		if (notifiedActionOverride != null && notifiedActionOverride.trim().length() > 0) {
 			LOG.info("handleNotification() received notifiedAction of: " + notifiedAction + 
 					", we are OVERRIDING replicator action to: " + notifiedActionOverride);

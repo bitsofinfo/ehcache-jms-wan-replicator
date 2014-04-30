@@ -9,6 +9,9 @@ import net.sf.ehcache.distribution.CacheReplicator;
 import net.sf.ehcache.event.CacheEventListener;
 import net.sf.ehcache.event.CacheEventListenerFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Implementation CacheEventListenerFactory who's purpose
  * is to return a OverridableActionCacheReplicator that proxies another CacheReplicator 
@@ -22,6 +25,8 @@ import net.sf.ehcache.event.CacheEventListenerFactory;
  *
  */
 public class OverridableActionCacheReplicatorFactory extends CacheEventListenerFactory {
+	
+	private final Log LOG = LogFactory.getLog(getClass());
 
 	@Override
 	public CacheEventListener createCacheEventListener(Properties properties) {
@@ -46,6 +51,10 @@ public class OverridableActionCacheReplicatorFactory extends CacheEventListenerF
 		
 		Map<String,String> overrideMap = expandDotNotationProperty(properties, "actionOverrideMap");
 		CacheReplicator cacheReplicatorToProxy = (CacheReplicator)factory.createCacheEventListener(properties);
+		
+		LOG.debug("createCacheEventListener() creating" +
+				" OverridableActionCacheReplicatorFactory, proxying: " + cacheReplicatorToProxy.getClass().getName());
+		
 		return new OverridableActionCacheReplicator(cacheReplicatorToProxy, overrideMap);
 		
 	}

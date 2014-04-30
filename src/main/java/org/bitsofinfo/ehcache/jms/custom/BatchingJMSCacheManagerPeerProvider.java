@@ -3,9 +3,6 @@ package org.bitsofinfo.ehcache.jms.custom;
 import static net.sf.ehcache.distribution.jms.JMSUtil.CACHE_MANAGER_UID;
 import static net.sf.ehcache.distribution.jms.JMSUtil.localCacheManagerUid;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Queue;
@@ -19,6 +16,9 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.distribution.jms.AcknowledgementMode;
 import net.sf.ehcache.distribution.jms.JMSCacheManagerPeerProvider;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * Batching JMSCacheManagerPeerProvider
@@ -30,7 +30,7 @@ import net.sf.ehcache.distribution.jms.JMSCacheManagerPeerProvider;
  */
 public class BatchingJMSCacheManagerPeerProvider extends JMSCacheManagerPeerProvider {
 
-	private static final Logger LOG = Logger.getLogger(BatchingJMSCacheManagerPeerProvider.class.getName());
+	private final Log LOG = LogFactory.getLog(getClass());
 	 
 	private long maxBatchQueuingTimeMS;
 	private int maxEventsPerBatch;
@@ -85,7 +85,7 @@ public class BatchingJMSCacheManagerPeerProvider extends JMSCacheManagerPeerProv
             replicationTopicConnection.setExceptionListener(new ExceptionListener() {
 
                 public void onException(JMSException e) {
-                    LOG.log(Level.SEVERE, "Exception on replication Connection: " + e.getMessage(), e);
+                    LOG.error("Exception on replication Connection: " + e.getMessage(), e);
                 }
             });
 
@@ -93,7 +93,7 @@ public class BatchingJMSCacheManagerPeerProvider extends JMSCacheManagerPeerProv
 
             if (listenToTopic) {
 
-                LOG.fine("Listening for message on topic " + replicationTopic.getTopicName());
+                LOG.debug("Listening for message on topic " + replicationTopic.getTopicName());
                 //ignore messages we have sent. The third parameter is noLocal, which means do not deliver back to the sender
                 //on the same connection
                 TopicSession topicSubscriberSession = replicationTopicConnection.createTopicSession(false, acknowledgementMode.toInt());
@@ -134,7 +134,7 @@ public class BatchingJMSCacheManagerPeerProvider extends JMSCacheManagerPeerProv
             }
             getQueueRequestReceiver.setMessageListener(cachePeer);
         } catch (JMSException e) {
-            LOG.log(Level.SEVERE, "Cannot register " + cachePeer + " as messageListener", e);
+            LOG.error("Cannot register " + cachePeer + " as messageListener", e);
         }
 
 

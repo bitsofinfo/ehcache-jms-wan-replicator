@@ -4,8 +4,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -19,6 +17,8 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.distribution.jms.JMSCachePeer;
 import net.sf.ehcache.distribution.jms.JMSEventMessage;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bitsofinfo.ehcache.jms.custom.batch.BatchJMSEventMessage;
 import org.bitsofinfo.ehcache.jms.custom.batch.BatchJMSEventMessageUtil;
 
@@ -41,7 +41,7 @@ import org.bitsofinfo.ehcache.jms.custom.batch.BatchJMSEventMessageUtil;
  */
 public class BatchingJMSCachePeer extends JMSCachePeer {
 
-	private static final Logger LOG = Logger.getLogger(BatchingJMSCachePeer.class.getName());
+	private final Log LOG = LogFactory.getLog(getClass());
 
 	/**
 	 * The current BatchJMSEventMessage that is queued
@@ -102,7 +102,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 	private BatchJMSEventMessage getBatchJMSEventMessage() {
 		synchronized(batchLock) {
 			if (this.currentBatchJMSEventMessage == null) {
-				LOG.log(Level.FINE, "getBatchJMSEventMessage() creating new BatchJMSEventMessage for queueing");
+				LOG.debug("getBatchJMSEventMessage() creating new BatchJMSEventMessage for queueing");
 				this.currentBatchJMSEventMessage = new BatchJMSEventMessage();
 			}
 			return this.currentBatchJMSEventMessage;
@@ -119,8 +119,8 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 	@Override
 	public void send(List eventMessages) throws RemoteException {
 
-		if (LOG.isLoggable(Level.FINEST)) {
-			LOG.finest("send ( eventMessages = " + eventMessages + " ) called ");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("send ( eventMessages = " + eventMessages + " ) called ");
 		}
 
 		for (Object eventMessage : eventMessages) {
@@ -138,7 +138,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 							(jem.getEvent() == JMSEventMessage.REMOVE && 
 							BatchJMSEventMessage.keyIsCompatible(jem))) {
 
-						LOG.log(Level.FINE, "send() JMSEventMessage["+jem.getEvent()+"] is batchable... evaluating...:");
+						LOG.debug("send() JMSEventMessage["+jem.getEvent()+"] is batchable... evaluating...:");
 
 						// synchronize on batch lock
 						synchronized(batchLock) {
@@ -165,7 +165,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 
 							// past MAX events?
 							if (batchJMSEventMessage.getTotalEvents() >= this.maxEventsPerBatch) {
-								LOG.log(Level.FINE, "send() sending BatchJMSEventMessage w/ "
+								LOG.debug("send() sending BatchJMSEventMessage w/ "
 										+ batchJMSEventMessage.getTotalEvents() + " events, which is >= max:" + this.maxEventsPerBatch);
 								eventMessage = batchJMSEventMessage;
 								this.currentBatchJMSEventMessage = null;
@@ -173,7 +173,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 
 								// have we been queueing the Batch message past the max time?
 							} else if (totalQueuedTimeMS > this.maxBatchQueuingTimeMS) {
-								LOG.log(Level.FINE, "send() sending BatchJMSEventMessage w/ "
+								LOG.debug("send() sending BatchJMSEventMessage w/ "
 										+ batchJMSEventMessage.getTotalEvents() + " events, who's queued" +
 										" time ["+totalQueuedTimeMS+"MS] is > max queueing time of " + maxBatchQueuingTimeMS+"MS");
 										eventMessage = batchJMSEventMessage;
@@ -181,7 +181,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 
 							} else {
 
-								LOG.log(Level.FINE, "send() BatchJMSEventMessage will remain in queue... neither max events or max queue time has been reached");
+								LOG.debug("send() BatchJMSEventMessage will remain in queue... neither max events or max queue time has been reached");
 
 								// nullify the eventMessage which will prevent anything
 								// from being sent right now.....
@@ -192,7 +192,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 					}
 
 				} catch(Throwable e) {
-					LOG.log(Level.SEVERE, "send() unexpected error in" +
+					LOG.error("send() unexpected error in" +
 							" BatchJMSEventMessage processing..." + e.getMessage(),e);
 				}
 			}
@@ -206,7 +206,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 					ObjectMessage message = producerSession.createObjectMessage((JMSEventMessage) eventMessage);
 					messageProducer.send(message);
 				} catch (JMSException e) {
-					LOG.log(Level.SEVERE, e.getMessage(), e);
+					LOG.error(e.getMessage(), e);
 					throw new RemoteException(e.getMessage());
 				}
 
@@ -221,7 +221,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 					messageProducer.send(message);
 
 				} catch (Exception e) {
-					LOG.log(Level.SEVERE, "send() ERROR marshalling BatchJMSEventMessage! " + e.getMessage(), e);
+					LOG.error("send() ERROR marshalling BatchJMSEventMessage! " + e.getMessage(), e);
 					throw new RemoteException(e.getMessage());
 				}
 
@@ -272,7 +272,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 				}
 
 			} catch(Throwable e) {
-				LOG.log(Level.SEVERE, "Error attempting to evaluate inbound " +
+				LOG.error("Error attempting to evaluate inbound " +
 						"TextMessage converting payload to BatchJMSEventMessage?: " + e.getMessage(), e);
 			}
 
@@ -302,7 +302,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 
 					if (toEval.getTotalEvents() > 0 && totalQueuedTimeMS > this.maxBatchQueuingTimeMS) {
 						
-						LOG.log(Level.FINE, "batchedMessageSender() sending BatchJMSEventMessage w/ "
+						LOG.debug("batchedMessageSender() sending BatchJMSEventMessage w/ "
 								+ toEval.getTotalEvents() + " events, who's queued" +
 								" time ["+totalQueuedTimeMS+"MS] is > max queueing time of " + maxBatchQueuingTimeMS+"MS");
 								
@@ -320,7 +320,7 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 				
 				
 			} catch(Throwable e) {
-				LOG.log(Level.SEVERE, "batchedMessageSender() error: " + e.getMessage(), e);
+				LOG.error("batchedMessageSender() error: " + e.getMessage(), e);
 			}
 		}
 	}
