@@ -262,7 +262,35 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 					// we do this because certain methods in JMSCachePeer are private
 					// and we can't override them/call them....
 					for (JMSEventMessage msg : convertedMsgs) {
-						super.onMessage(new JMSEventMessageCarrier(msg));
+						try {
+							super.onMessage(new JMSEventMessageCarrier(msg));
+							
+						} catch(Exception e) {
+							
+							// these might be common depending where the current app
+							// is with regards to what caches are created yet in the app state
+							/**
+							 * Warn only on these:
+							 * net.sf.ehcache.distribution.jms.InvalidJMSMessageException: No cache named 
+							 * XXXXX in the target CacheManager.
+							 **/
+							if (e.getMessage().indexOf("No cache named") != -1) {
+								
+								// no exception log
+								LOG.warn("Error attempting to evaluate inbound " +
+									"TextMessage converting payload to BatchJMSEventMessage?: " + e.getMessage());
+								
+								
+							} else {
+								// with exception log
+								LOG.error("Error attempting to evaluate inbound " +
+									"TextMessage converting payload to BatchJMSEventMessage?: " + e.getMessage(), e);
+							}
+							
+							// continue forward we don't want ONE JMSEventMessage that fails 
+							// blowing up the entire list we need to process
+							continue;
+						}
 					}
 
 
@@ -272,8 +300,19 @@ public class BatchingJMSCachePeer extends JMSCachePeer {
 				}
 
 			} catch(Throwable e) {
-				LOG.error("Error attempting to evaluate inbound " +
+				// these might be common depending where the current app
+				// is with regards to what caches are created yet in the app state
+				if (e.getMessage().indexOf("No cache named") != -1) {
+					
+					// no exception log
+					LOG.warn("Error attempting to evaluate inbound " +
+						"TextMessage converting payload to BatchJMSEventMessage?: " + e.getMessage());
+					
+				} else {
+					// with exception log
+					LOG.error("Error attempting to evaluate inbound " +
 						"TextMessage converting payload to BatchJMSEventMessage?: " + e.getMessage(), e);
+				}
 			}
 
 
