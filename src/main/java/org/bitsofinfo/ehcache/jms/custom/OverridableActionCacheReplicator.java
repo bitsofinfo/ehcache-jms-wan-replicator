@@ -96,7 +96,7 @@ public class OverridableActionCacheReplicator implements CacheReplicator {
 				+ (element!=null && element.getObjectKey()!=null? element.getObjectKey().toString() : "null"));
 		
 		if (notifiedActionOverride != null && notifiedActionOverride.trim().length() > 0) {
-			LOG.info("handleNotification() received notifiedAction of: " + notifiedAction + 
+			LOG.debug("handleNotification() received notifiedAction of: " + notifiedAction + 
 					", we are OVERRIDING replicator action to: " + notifiedActionOverride);
 			notifiedAction = notifiedActionOverride;
 		}

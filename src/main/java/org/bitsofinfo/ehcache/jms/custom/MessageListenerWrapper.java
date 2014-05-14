@@ -50,7 +50,7 @@ public class MessageListenerWrapper implements MessageListener {
 			if (msg.propertyExists(msgProperty)) {
 				String value = msg.getStringProperty(msgProperty);
 				if (value != null && value.equalsIgnoreCase(valueToIgnore)) {
-					LOG.info("onMessage() ignoring message w/ " +
+					LOG.debug("onMessage() ignoring message w/ " +
 							"property matching " + msgProperty + " = " + valueToIgnore);
 					return;
 				}
@@ -62,7 +62,7 @@ public class MessageListenerWrapper implements MessageListener {
 		}
 		
 		try {
-			LOG.info("onMessage() processing message w/ " +
+			LOG.debug("onMessage() processing message w/ " +
 					"property NOT matching " + msgProperty + " = " + valueToIgnore + " msgId:" + msg.getJMSMessageID());
 			
 			proxied.onMessage(msg);

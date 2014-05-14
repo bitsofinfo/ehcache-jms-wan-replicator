@@ -196,7 +196,7 @@ public class CustomizableJMSCacheManagerPeerProviderFactory extends CacheManager
 		}
 		
 	    public void run() {
-	      System.out.println("JMSCleanupShutdownHook: Thread initiated.");
+	      LOG.info("JMSCleanupShutdownHook: Thread initiated.");
 	      try {
 	    	  topicConn.close();
 	      } catch(Throwable e) {
