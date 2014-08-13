@@ -68,13 +68,18 @@
 		       include actual cached element data) to REMOVEs (no data) (same as replicateUpdatesViaCopy). 
 		       Receiving DC's across WANs, will respond by just dumping these keys locally and
 		       letting cache-misses repopulate from the underlying authoritative datasource
+		       
+		       NOTE: setting replicateAsynchronously=true is OPTIONAL given this will just send
+		       all notifications to BatchingJMSCacheManagerPeerProvider which effectively 
+		       does the same thing (async batching on intervals). Setting this to true just 
+		       may create additional latency and uncessary threads.
 		   -->	
 	       <cacheEventListenerFactory
 			     class="org.bitsofinfo.ehcache.jms.custom.OverridableActionCacheReplicatorFactory"
 			     properties="factoryClass=net.sf.ehcache.distribution.jms.JMSCacheReplicatorFactory,
 			                  actionOverrideMap.put=nothing,
 			                  actionOverrideMap.update=remove,
-                              replicateAsynchronously=true,
+                              		  replicateAsynchronously=true,
 			                  replicatePuts=true,
 			                  replicateUpdates=true,
 			                  replicateUpdatesViaCopy=true,
@@ -105,13 +110,18 @@
 		       include actual cached element data) to REMOVEs (no data) (same as replicateUpdatesViaCopy). 
 		       Receiving DC's across WANs, will respond by just dumping these keys locally and
 		       letting cache-misses repopulate from the underlying authoritative datasource
+		       
+		       NOTE: setting replicateAsynchronously=true is OPTIONAL given this will just send
+		       all notifications to BatchingJMSCacheManagerPeerProvider which effectively 
+		       does the same thing (async batching on intervals). Setting this to true just 
+		       may create additional latency and uncessary threads.
 		   -->	
 	       <cacheEventListenerFactory
 			     class="org.bitsofinfo.ehcache.jms.custom.OverridableActionCacheReplicatorFactory"
 			     properties="factoryClass=net.sf.ehcache.distribution.jms.JMSCacheReplicatorFactory,
 			                  actionOverrideMap.put=nothing,
 			                  actionOverrideMap.update=remove,
-                              replicateAsynchronously=true,
+                              	          replicateAsynchronously=true,
 			                  replicatePuts=true,
 			                  replicateUpdates=true,
 			                  replicateUpdatesViaCopy=true,
@@ -142,13 +152,18 @@
 		       include actual cached element data) to REMOVEs (no data) (same as replicateUpdatesViaCopy). 
 		       Receiving DC's across WANs, will respond by just dumping these keys locally and
 		       letting cache-misses repopulate from the underlying authoritative datasource
+		       
+		       NOTE: setting replicateAsynchronously=true is OPTIONAL given this will just send
+		       all notifications to BatchingJMSCacheManagerPeerProvider which effectively 
+		       does the same thing (async batching on intervals). Setting this to true just 
+		       may create additional latency and uncessary threads.
 		   -->	
 	       <cacheEventListenerFactory
 			     class="org.bitsofinfo.ehcache.jms.custom.OverridableActionCacheReplicatorFactory"
 			     properties="factoryClass=net.sf.ehcache.distribution.jms.JMSCacheReplicatorFactory,
 			                  actionOverrideMap.put=nothing,
 			                  actionOverrideMap.update=remove,
-                              replicateAsynchronously=true,
+                              		  replicateAsynchronously=true,
 			                  replicatePuts=true,
 			                  replicateUpdates=true,
 			                  replicateUpdatesViaCopy=true,
