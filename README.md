@@ -5,6 +5,8 @@ This is customizable module that builds upon Ehcache's replication framework (sp
 
 Caveat: this has yet to be used in a production environment, but is currently being evaluated/tested as part of a larger project where it (or something like it) might be levereged.
 
+![Alt text](/docs/diagram.png "Diagram")
+
 What does this add to Ehcache JMS replication?
 ----------------------
 * Decorates the OUTBOUND JMS Messages with additional custom key-value pairs (strings)
@@ -62,4 +64,4 @@ Reference
 author: bitsofinfo.g[at]gmail.com
 
 
-![Alt text](/docs/diagram.png "Diagram")
+
