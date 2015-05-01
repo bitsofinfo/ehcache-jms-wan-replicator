@@ -16,7 +16,7 @@ What does this add to Ehcache JMS replication?
 
 What kinds of apps has this been used with?
 ----------------------
-This has been tested in a standalone dummy application environment, via unit-tests as well as configured for [Liferay Portal 6.2 in a GSLB'd topology](https://www.liferay.com/documentation/liferay-portal/6.2/user-guide/-/ai/liferay-clustering-liferay-portal-6-2-user-guide-20-en "cluster") similar to the diagram below (multiple WAN connected data-centers); where all Liferay caches are additionally bound to this cache peer provider. Enabling batching is critical for this setup.
+This has been tested in a standalone dummy application environment, via unit-tests as well as configured for [Liferay Portal 6.2 in a GSLB'd topology](https://bitsofinfo.wordpress.com/2014/05/21/clustering-liferay-globally-across-data-centers-gslb-with-jgroups-and-relay2/ "cluster") similar to the diagram below (multiple WAN connected data-centers); where all Liferay caches are additionally bound to this cache peer provider. Enabling batching is critical for this setup.
 
 Background
 -----------------
@@ -53,6 +53,7 @@ Reference
 
 * http://bitsofinfo.wordpress.com/2014/04/21/ehcache-replicated-caching-with-jms-aws-sqs-sns-nevado/
 * http://bitsofinfo.wordpress.com/2014/04/22/part-2-nevado-jms-ehcache-jms-wan-replication-and-aws/
+* https://bitsofinfo.wordpress.com/2014/05/21/clustering-liferay-globally-across-data-centers-gslb-with-jgroups-and-relay2/
 * http://ehcache.org/documentation/get-started/cache-topologies
 * http://ehcache.org/documentation/replication/index
 * http://ehcache.org/documentation/replication/jms-replicated-caching
